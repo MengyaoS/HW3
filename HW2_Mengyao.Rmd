@@ -1,0 +1,133 @@
+---
+title: "ADA_HW2"
+author: "Mengyao Shi"
+date: "9/6/2021"
+output: html_document
+---
+
+```{r}
+## If you receive error messages while installing packages/libraries, see here: https://stackoverflow.com/questions/32932354/how-to-install-the-libraryreadr
+
+#install.packages("foreign") 
+#install.packages("haven") 
+#install.packages("readr") 
+
+library(foreign) #for reading spss (read.spss()), stata (read.dta()) and xpt (read.xport()) files
+library(haven) #for reading SPSS (read_sav()), stata (read_dta()), SAS(read_sas()) and xpt (read_xpt()) files
+library(readr) #for reading csv file (read_csv())
+```
+
+## 1. Import class one survey data from our Github site (https://github.com/kijohnson/ADA-Fall-2021) (The dataset called ‘Class 1 Survey Fall 2021.csv’ is located in the class one folder), calling the R dataframe that you create C1survey.
+```{r}
+C1survey <-
+ read_csv(
+    "https://raw.githubusercontent.com/kijohnson/ADA-Fall-2021/master/Class%201%20Survey%20Fall%202021.csv"
+  )
+```
+
+## 2. Determine: a. the number of observations (i.e. the number of people who filled out the survey) and b. the number of variables in the dataframe.
+
+```{r}
+dim(C1survey)
+```
+## 3. a. Rename the column variables to something shorter and that is descriptive of what the variable is about (for example like_dogs for the ‘Do you like dogs?’ question variable) and b. Display that they are renamed.
+
+```{r}
+install.packages("plyr")
+library(plyr)
+C1survey <- rename(C1survey, c("Do you like dogs?"="like_dogs", 
+                               "Do you like cats?"="like_cats", 
+                               "If you were stranded on a desert island, what is the one item you want to have with you?"="one_item",
+                               
+                               'If you were to create a slogan for your life, what would the slogan be? (Examples: "Eat, drink, and be merry, for tomorrow, we all die." "Bite off more than you can chew." "There are far better things ahead than any we leave behind.")' = "slogan",
+                               
+                               "What is your favorite day of the week?"="favorite_day",
+                               "Are you a lark, an owl, or a hummingbird?"="person_type",
+                               "What is your favorite food?"="favorite_food",
+                               "What is your favorite drink?"="favorite_drink",
+                               "What is your favorite season?"="favorite_season",
+                               "What is your favorite Month?"="favorite_month",
+                               "What is one hobby that you enjoy?"="hobby",
+                               "What is your degree program?"="program",
+                               "What is your primary specialization?"="specialization",
+                               "What is your primary statistical software?"="software",
+                               "What is your level of R experience (1=None, 5=Advanced)?"="Rlevel",
+                               "How comfortable are you with coding?"="coding_comfort",
+                               "How long have you been coding (in years or months)?"="coding_period",
+                               "What are three things you hope to learn in this course?"="things_to_learn",
+                               "What is your major public health area of interest (e.g. cancer, heart disease, maternal child health, disparities, etc.)?"="PH_interest",
+                               "What is your favorite number?"="favorite_number",
+                               "What is your birth day (e.g. October 28-report 28)?"="birth_day",
+                               "What is your birth month (e.g. October 28-report 10)?"="birth_month",
+                               "What is your home country?"="home_country",
+                               "What is your home state?"="home_state",
+                               "What is your home city?"="home_city",
+                               "What is your highest education level?"="edu_level"))
+
+#display the change in variable names
+colnames(C1survey) 
+```
+
+## 4. Write code to determine and display the number of factor, integer, numerical, and character variables there are in the C1survey dataset.
+
+```{r}
+#count up number of different types of variables using sapply and table. In sapply we asks for the class of the variables in the dataset
+sapply(C1survey, class)
+
+
+#then we ask to put this information in a table. 
+table(sapply(C1survey, class))
+```
+
+## 5. a. Using code, check the bday and bmonth variables for any unusual or missing values. If you find any, b. describe what you will do with the unusual values in a comment before or immediately following the code that does it, and c. after you have cleaned up any unusual values, find the median bday and month. *Note: please make sure that your bday and month variables are numeric before doing statistics
+
+```{r}
+# covert into numeric variable
+C1survey$birth_day <- as.numeric(C1survey$birth_day)
+C1survey$birth_month <- as.numeric(C1survey$birth_month)
+
+# check bday and bmoth
+summary(C1survey$birth_day)
+summary(C1survey$birth_month)
+
+# drop na and calculate the median
+median(C1survey$birth_day, na.rm = TRUE)
+median(C1survey$birth_month, na.rm = TRUE)
+```
+
+## 6. a. Create a new variable called bseason that gives the season according to Northern Meteorological season in which respondents were born (winter=12/1 to 2/29, spring=3/1 to 5/31, summer=6/1 to 8/31, fall=9/1 to 11/30). b. Using the table function, print a table of Seasons in the columns and bmonths in the rows that allows you to check that the coding is correct c. Sum the columns using the addmargins function to answer the question of how many classmates were born in each season? Include your answer in the code you turn in.
+
+```{r}
+# create a new variable
+C1survey$bseason <- ifelse(C1survey$birth_month %in% c(1,2,12), "winter",
+                           ifelse(C1survey$birth_month %in% c(3,4,5), "spring",
+                           ifelse(C1survey$birth_month %in% c(6,7,8), "summer",
+                           ifelse(C1survey$birth_month %in% c(9,10,11), "fall", "NA"))))
+
+# print a table of seasons
+table(C1survey$bseason)
+
+# addmargins function
+tab<-addmargins(table(C1survey$birth_month, C1survey$bseason), 1)
+tab
+```
+
+## 7. Pick your favorite variable to analyze, come up with a question you want to answer with that variable, generate the code, and provide an answer to your question. Describe what you did using comments (i.e. #’s).
+
+```{r}
+# Question: what is the mean level of R among all classmates?
+mean(C1survey$Rlevel, na.rm = TRUE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
